@@ -55,7 +55,7 @@ int main() {
 }
 ```
 
-To compile this example, just type the following commands from the parent directory.
+See also the example in `test/test.cpp`. To compile that, just type the following commands from the parent directory.
 
     $ cd test
     $ mkdir build
