@@ -44,10 +44,12 @@ int main() {
         fin.close();
 
         // test iterator
-        fin.open(filename, advice);
-        for (auto x : fin) {
+        mm::file_source<uint16_t> fin2;
+        fin2.open(filename, advice);
+        for (auto x : fin2) {
             std::cout << "read " << x << std::endl;
         }
+        // on destruction, fin2 gets closed first
     }
 
     std::remove(filename.c_str());

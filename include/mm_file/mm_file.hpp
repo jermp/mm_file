@@ -100,8 +100,9 @@ template <typename T>
 struct file_source : public file<T const> {
     typedef file<T const> base;
 
+    file_source() {}
+
     file_source(std::string const& path, int adv = advice::normal) {
-        base::init();
         open(path, adv);
     }
 
@@ -134,8 +135,9 @@ template <typename T>
 struct file_sink : public file<T> {
     typedef file<T> base;
 
+    file_sink() {}
+
     file_sink(std::string const& path, size_t n) {
-        base::init();
         open(path, n);
     }
 
