@@ -142,7 +142,7 @@ struct file_sink : public file<T> {
     }
 
     void open(std::string const& path, size_t n) {
-        static const mode_t mode = 0600;
+        static const mode_t mode = 0600;  // read/write
         base::m_fd = ::open(path.c_str(), O_RDWR | O_CREAT | O_TRUNC, mode);
         if (base::m_fd == -1) {
             throw std::runtime_error("cannot open file");

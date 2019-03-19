@@ -2,7 +2,7 @@ Memory-mapped files
 -------------------
 A self-contained, header-only, implementation of memory-mapped files in C++
 for both reading and writing.
-This is meant to offer the same capability of `boost::mapped_file` (`source` and `sink`) but avoiding
+This is meant to offer the same capability of [`boost::mapped_file`](https://www.boost.org/doc/libs/1_69_0/libs/iostreams/doc/classes/mapped_file.html) (`source` and `sink`) but avoiding
 the dependance from `boost`.
 
 Example usage.
