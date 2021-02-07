@@ -23,10 +23,6 @@ struct file {
         init();
     }
 
-    ~file() {
-        close();
-    }
-
     bool is_open() const {
         return m_fd != -1;
     }
