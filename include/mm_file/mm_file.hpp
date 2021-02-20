@@ -17,8 +17,6 @@ static const int sequential = POSIX_MADV_SEQUENTIAL;
 
 template <typename T>
 struct file {
-    static_assert(std::is_pod<T>::value, "T must be a POD");
-
     file() {
         init();
     }
