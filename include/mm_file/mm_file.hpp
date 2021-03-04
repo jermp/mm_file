@@ -88,7 +88,20 @@ protected:
         m_size = 0;
         m_data = nullptr;
     }
+
+    void check_fd() {
+        if (m_fd == -1) throw std::runtime_error("cannot open file");
+    }
 };
+
+template <typename Pointer>
+Pointer mmap(int fd, size_t size, int prot) {
+    static const size_t offset = 0;
+    Pointer p =
+        static_cast<Pointer>(::mmap(NULL, size, prot, MAP_SHARED, fd, offset));
+    if (p == MAP_FAILED) throw std::runtime_error("mmap failed");
+    return p;
+}
 
 template <typename T>
 struct file_source : public file<T const> {
@@ -102,23 +115,13 @@ struct file_source : public file<T const> {
 
     void open(std::string const& path, int adv = advice::normal) {
         base::m_fd = ::open(path.c_str(), O_RDONLY);
-        if (base::m_fd == -1) {
-            throw std::runtime_error("cannot open file");
-        }
-
+        base::check_fd();
         struct stat fs;
         if (fstat(base::m_fd, &fs) == -1) {
             throw std::runtime_error("cannot stat file");
         }
         base::m_size = fs.st_size;
-
-        // map entire file starting from the beginning (offset 0)
-        base::m_data = static_cast<T const*>(
-            mmap(NULL, base::m_size, PROT_READ, MAP_SHARED, base::m_fd, 0));
-        if (base::m_data == MAP_FAILED) {
-            throw std::runtime_error("mmap failed");
-        }
-
+        base::m_data = mmap<T const*>(base::m_fd, base::m_size, PROT_READ);
         if (posix_madvise((void*)base::m_data, base::m_size, adv)) {
             throw std::runtime_error("madvise failed");
         }
@@ -131,28 +134,36 @@ struct file_sink : public file<T> {
 
     file_sink() {}
 
+    file_sink(std::string const& path) {
+        open(path);
+    }
+
     file_sink(std::string const& path, size_t n) {
         open(path, n);
+    }
+
+    void open(std::string const& path) {
+        static const mode_t mode = 0600;  // read/write
+        base::m_fd = ::open(path.c_str(), O_RDWR, mode);
+        base::check_fd();
+        struct stat fs;
+        if (fstat(base::m_fd, &fs) == -1) {
+            throw std::runtime_error("cannot stat file");
+        }
+        base::m_size = fs.st_size;
+        base::m_data =
+            mmap<T*>(base::m_fd, base::m_size, PROT_READ | PROT_WRITE);
     }
 
     void open(std::string const& path, size_t n) {
         static const mode_t mode = 0600;  // read/write
         base::m_fd = ::open(path.c_str(), O_RDWR | O_CREAT | O_TRUNC, mode);
-        if (base::m_fd == -1) {
-            throw std::runtime_error("cannot open file");
-        }
-
+        base::check_fd();
         base::m_size = n * sizeof(T);
-        // truncate the file at the new size
-        ftruncate(base::m_fd, base::m_size);
-
-        // map [m_size] bytes starting from the beginning (offset 0)
+        ftruncate(base::m_fd,
+                  base::m_size);  // truncate the file at the new size
         base::m_data =
-            static_cast<T*>(mmap(NULL, base::m_size, PROT_READ | PROT_WRITE,
-                                 MAP_SHARED, base::m_fd, 0));
-        if (base::m_data == MAP_FAILED) {
-            throw std::runtime_error("mmap failed");
-        }
+            mmap<T*>(base::m_fd, base::m_size, PROT_READ | PROT_WRITE);
     }
 };
 
