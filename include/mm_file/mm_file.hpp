@@ -21,6 +21,13 @@ struct file {
         init();
     }
 
+    ~file() {
+        close();
+    }
+
+    file(file const&) = delete;             // non construction-copyable
+    file& operator=(file const&) = delete;  // non copyable
+
     bool is_open() const {
         return m_fd != -1;
     }
