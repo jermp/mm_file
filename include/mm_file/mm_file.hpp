@@ -57,7 +57,7 @@ struct file {
     struct iterator {
         iterator(T* addr, size_t offset = 0) : m_ptr(addr + offset) {}
 
-        T operator*() {
+        T operator*() const {
             return *m_ptr;
         }
 
