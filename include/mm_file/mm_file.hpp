@@ -55,14 +55,26 @@ struct file {
     }
 
     struct iterator {
+        using iterator_category = std::random_access_iterator_tag;
+
         iterator(T* addr, size_t offset = 0) : m_ptr(addr + offset) {}
 
-        T operator*() const {
+        T operator*() {
             return *m_ptr;
         }
 
         void operator++() {
             ++m_ptr;
+        }
+
+        iterator operator+(uint64_t jump) {
+            iterator copy(m_ptr + jump);
+            return copy;
+        }
+
+        iterator operator-(uint64_t jump) {
+            iterator copy(m_ptr - jump);
+            return copy;
         }
 
         bool operator==(iterator const& rhs) const {
